@@ -1,13 +1,13 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.OpacityBar;
@@ -23,7 +23,6 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.PathLayer;
-import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
@@ -32,15 +31,10 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 import org.oscim.theme.styles.LineStyle;
-import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmWaterJsonTileSource;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -61,11 +55,14 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     private PathLayer path;
 
+    private boolean doDraw = true;
+
     @Inject
     protected Session mSession;
 
     @Inject
     protected RxBus mRxBus;
+    private int currentLineColor;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -92,8 +89,8 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
-
-        currentLineStyle = new LineStyle(10, "", Color.RED, 10, Paint.Cap.BUTT, false, 0, Color.TRANSPARENT, 0, 0, 0, false, null, false);
+        currentLineColor = Color.RED;
+        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
 
         setupEnvironment();
         registerInfoBusses();
@@ -104,6 +101,13 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     private void addControls() {
         addColorPickerControl();
+        addSwitchButtons();
+    }
+
+    private void addSwitchButtons() {
+        Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
+        //s.onTouchEvent();
+        doDraw = s.isChecked();
     }
 
     private void addColorPickerControl() {
@@ -127,8 +131,9 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
             for (int i = 0; i < 10000; i++) {
                 GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - ((double)i / 10000));
                 lastLocation = p;
-                path.addPoint(p);
-                Log.e("PathDrawer", "Did draw Path particle @ " + p.getLatitude() + "," + p.getLongitude());
+                if (doDraw) {
+                    path.addPoint(p);
+                }
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
@@ -205,7 +210,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
         BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
-        mRxBus.post(new DrawParameterEvents(bBox));
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, 3.0));
         mMap.setMapPosition(pos);
 
         testPathDrawing();
@@ -213,9 +218,9 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     @Override
     public void onColorChanged(int color) {
+        currentLineColor = color;
         path = new PathLayer(mMap, color, 3);
         mMap.layers().add(path);
         path.addPoint(lastLocation);
-        Log.e("COLOR", "color was changed to " + color);
     }
 }

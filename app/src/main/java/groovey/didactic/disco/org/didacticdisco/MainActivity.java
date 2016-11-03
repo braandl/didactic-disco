@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 
+import groovey.didactic.disco.org.didacticdisco.fragments.GameFragment;
 import groovey.didactic.disco.org.didacticdisco.fragments.SignInFragment;
 
 public class MainActivity extends FragmentActivity {
@@ -14,8 +15,6 @@ public class MainActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_login);
 
-
-        FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         android.app.FragmentManager.enableDebugLogging(false);
         /*transaction.setCustomAnimations(R.anim.card_slide_in, 0, 0,
