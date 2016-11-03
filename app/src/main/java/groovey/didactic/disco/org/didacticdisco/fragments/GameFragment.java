@@ -51,6 +51,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private MapView mMapView = null;
 
     private LineStyle currentLineStyle = null;
+    private int currentlineWidth = 3;
     private GeoPoint lastLocation = null;
 
     private PathLayer path;
@@ -89,14 +90,12 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
-        currentLineColor = Color.RED;
-        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
-
-        setupEnvironment();
         registerInfoBusses();
         addControls();
 
 
+        setupEnvironment();
+        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
     }
 
     private void addControls() {
@@ -123,6 +122,8 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         picker.addSVBar((SVBar) getActivity().findViewById(R.id.svbar));
         picker.setOnColorChangedListener(this);
         picker.setShowOldCenterColor(false);
+
+        currentLineColor = picker.getColor();
     }
 
     /**
@@ -197,9 +198,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(l);
         mMap.layers().add(new LabelLayer(mMap, l));
 
-
-        int c = Color.fade(Color.rainbow((float) (53 + 90) / 180), 0.5f);
-        path = new PathLayer(mMap, c, 3);
+        path = new PathLayer(mMap, currentLineColor, 3);
         mMap.layers().add(path);
 
         /*
@@ -216,15 +215,15 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
         BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
-        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, 3.0));
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
         mMap.setMapPosition(pos);
 
-        testPathDrawing();
+        //testPathDrawing();
     }
 
     private void restartWithColor(int color) {
         currentLineColor = color;
-        path = new PathLayer(mMap, color, 3);
+        path = new PathLayer(mMap, color, currentlineWidth);
         mMap.layers().add(path);
         if (lastLocation != null) {
             path.addPoint(lastLocation);
