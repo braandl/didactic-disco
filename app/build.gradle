@@ -34,6 +34,9 @@ dependencies {
     // view and class injections
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    apt 'com.google.dagger:dagger-compiler:2.5'
+    compile 'com.google.dagger:dagger:2.5'
+
     // RxJava
     provided 'javax.annotation:jsr250-api:1.0'
     compile 'io.reactivex:rxandroid:1.2.1'
