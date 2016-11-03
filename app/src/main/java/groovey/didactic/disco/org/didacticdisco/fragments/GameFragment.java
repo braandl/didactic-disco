@@ -47,7 +47,11 @@ import javax.inject.Inject;
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
+<<<<<<< HEAD
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
+=======
+import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
+>>>>>>> be32c690003cf414ccc4aa4508acacdcd411f36e
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
