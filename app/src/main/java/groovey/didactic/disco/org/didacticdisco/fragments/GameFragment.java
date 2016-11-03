@@ -63,6 +63,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     @Inject
     protected RxBus mRxBus;
+
     private int currentLineColor;
 
     public static GameFragment getInstance() {
