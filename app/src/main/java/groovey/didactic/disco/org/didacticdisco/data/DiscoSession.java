@@ -147,10 +147,6 @@ public final class DiscoSession implements Session {
         }
     }
 
-    /**
-     * Initialize all temp cache properties from device and <code>environment.xml</code>
-     * version name and version code
-     */
     private void initialize() {
         String uuid = get(R.string.key_uuid, "");
         if (uuid.equals("")) {

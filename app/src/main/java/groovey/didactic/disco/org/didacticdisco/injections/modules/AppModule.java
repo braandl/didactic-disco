@@ -14,6 +14,7 @@ import groovey.didactic.disco.org.didacticdisco.data.DefaultPersistentData;
 import groovey.didactic.disco.org.didacticdisco.data.DiscoSession;
 import groovey.didactic.disco.org.didacticdisco.data.PersistentData;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
+import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
 
 @Module
@@ -47,6 +48,13 @@ public class AppModule {
     @Singleton
     SharedPreferences provideSharedPreferences() {
         return PreferenceManager.getDefaultSharedPreferences(mApplication);
+    }
+
+
+    @Provides
+    @Singleton
+    RxBus provideRxBus() {
+        return new RxBus();
     }
 
     @Provides
