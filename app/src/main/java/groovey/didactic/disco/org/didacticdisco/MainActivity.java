@@ -1,12 +1,11 @@
 package groovey.didactic.disco.org.didacticdisco;
 
 import android.app.FragmentTransaction;
+import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 
-import groovey.didactic.disco.org.didacticdisco.fragments.GameFragment;
+import groovey.didactic.disco.org.didacticdisco.fragments.SignInFragment;
 
 public class MainActivity extends FragmentActivity {
 
@@ -22,7 +21,7 @@ public class MainActivity extends FragmentActivity {
         /*transaction.setCustomAnimations(R.anim.card_slide_in, 0, 0,
                                         R.anim.card_slide_out);*/
         transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
-        transaction.replace(R.id.content_frame, GameFragment.getInstance());
+        transaction.replace(R.id.content_frame, SignInFragment.getInstance());
         transaction.commit();
     }
 }
