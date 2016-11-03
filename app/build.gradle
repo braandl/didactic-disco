@@ -36,6 +36,7 @@ dependencies {
     compile project(':vtm-themes')
     compile project(':vtm-android')
     /*compile project(':vtm-extras')*/
+
     // view and class injections
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
@@ -59,6 +60,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:25.0.0'
+    compile 'com.android.support:design:24.2.1'
     testCompile 'junit:junit:4.12'
     compile project(path: ':vtm-extras')
 
