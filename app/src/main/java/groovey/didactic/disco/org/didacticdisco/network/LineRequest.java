@@ -3,7 +3,7 @@ package groovey.didactic.disco.org.didacticdisco.network;
 
 import java.util.ArrayList;
 
-public class Line {
+public class LineRequest {
 
     private String id;
 
@@ -17,12 +17,12 @@ public class Line {
 
     private String color;
 
-    public Line(String id,
-                String nick,
-                ArrayList<Coordinate> coordinates,
-                ArrayList<Coordinate> bbox,
-                double thickness,
-                String color) {
+    public LineRequest(String id,
+                       String nick,
+                       ArrayList<Coordinate> coordinates,
+                       ArrayList<Coordinate> bbox,
+                       double thickness,
+                       String color) {
         this.id = id;
         this.nick = nick;
         this.coordinates = coordinates;
