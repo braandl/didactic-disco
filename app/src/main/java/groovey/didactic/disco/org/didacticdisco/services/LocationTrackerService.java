@@ -25,11 +25,10 @@ import javax.inject.Inject;
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
-import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
+import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.network.ApiManager;
-import groovey.didactic.disco.org.didacticdisco.network.Line;
 
 
 public class LocationTrackerService extends Service implements
@@ -57,11 +56,11 @@ public class LocationTrackerService extends Service implements
     public void onCreate() {
         super.onCreate();
         ((DiscoApplication) this.getApplicationContext()).getAppComponent().inject(this);
-        mRxBus.register(BoundingBoxEvent.class, this::onBoundingBox);
+        mRxBus.register(DrawParameterEvents.class, this::onBoundingBox);
         mGoogleApiClient = getApiClient();
     }
 
-    private void onBoundingBox(BoundingBoxEvent bBoxEvent) {
+    private void onBoundingBox(DrawParameterEvents bBoxEvent) {
         bBox = bBoxEvent.getBoundingBox();
     }
 
