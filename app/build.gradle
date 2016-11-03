@@ -1,10 +1,15 @@
 apply plugin: 'com.android.application'
 apply plugin: 'android-apt'
 
-
 android {
     compileSdkVersion androidCompileSdk()
     buildToolsVersion androidBuildToolsVersion()
+
+    sourceSets {
+        main.jni.srcDirs = []
+        main.jniLibs.srcDirs = ['libs']
+    }
+
     defaultConfig {
         applicationId "groovey.didactic.disco.org.didacticdisco"
         minSdkVersion androidMinSdk()
@@ -55,6 +60,10 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.0.0'
     testCompile 'junit:junit:4.12'
+    compile project(path: ':vtm-extras')
+
+    // Color Mixer
+    compile 'com.commonsware.cwac:colormixer:0.6.+'
 }
 
 apply plugin: 'me.tatarka.retrolambda'
