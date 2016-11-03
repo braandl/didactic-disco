@@ -23,6 +23,7 @@ import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
 import org.oscim.layers.PathLayer;
+import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
@@ -31,10 +32,15 @@ import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
 import org.oscim.theme.styles.LineStyle;
+import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmWaterJsonTileSource;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -50,8 +56,8 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private MapPreferences mPrefs;
     private MapView mMapView = null;
 
-    private LineStyle currentLineStyle = new LineStyle(1, 1);
-    private Location lastLocation = null;
+    private LineStyle currentLineStyle = null;
+    private GeoPoint lastLocation = null;
 
     private PathLayer path;
 
@@ -86,9 +92,14 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
+
+        currentLineStyle = new LineStyle(10, "", Color.RED, 10, Paint.Cap.BUTT, false, 0, Color.TRANSPARENT, 0, 0, 0, false, null, false);
+
         setupEnvironment();
         registerInfoBusses();
         addControls();
+
+
     }
 
     private void addControls() {
@@ -111,11 +122,29 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mRxBus.register(LocationEvent.class, this::onNewLocation);
     }
 
+    public void testPathDrawing() {
+        this.mMap.addTask(() -> {
+            for (int i = 0; i < 10000; i++) {
+                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - ((double)i / 10000));
+                lastLocation = p;
+                path.addPoint(p);
+                Log.e("PathDrawer", "Did draw Path particle @ " + p.getLatitude() + "," + p.getLongitude());
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mMap.updateMap(true);
+
+            }
+        });
+    }
+
     //FIXME: Type
     public void onNewLocation(LocationEvent e) {
-        Location t = e.
+        /*Location t = e;
         GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
-        path.addPoint(p);
+        path.addPoint(p);*/
     }
 
 
@@ -155,11 +184,21 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(new LabelLayer(mMap, l));
 
 
-        /*l = new VectorTileLayer(mMap, new OsmBuildingJsonTileSource());
+        int c = Color.fade(Color.rainbow((float) (53 + 90) / 180), 0.5f);
+        path = new PathLayer(mMap, c, 3);
+        mMap.layers().add(path);
+
+        /*
+        l = new VectorTileLayer(mMap, new OsmBuildingJsonTileSource());
         l.setRenderTheme(theme);
         l.tileRenderer().setOverdrawColor(0);
         mMap.layers().add(l);
-        mMap.layers().add(new BuildingLayer(mMap, l));*/
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        */
+
+
+
+
         mPrefs.clear();
 
         //FIXME: Dynamic Start Position
@@ -169,14 +208,14 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mRxBus.post(new DrawParameterEvents(bBox));
         mMap.setMapPosition(pos);
 
-        path = new PathLayer(mMap, Color.RED);
-        
+        testPathDrawing();
     }
 
     @Override
     public void onColorChanged(int color) {
-        new LineStyle(1, currentLineStyle.style, color, currentLineStyle.width, currentLineStyle.cap, currentLineStyle.fixed, currentLineStyle.stipple, currentLineStyle.stippleColor, currentLineStyle.stippleWidth, currentLineStyle.fadeScale, currentLineStyle.blur, currentLineStyle.outline, currentLineStyle.texture, currentLineStyle.randomOffset);
-        path.setStyle(currentLineStyle);
-        Log.e("COLOR", "color was changed");
+        path = new PathLayer(mMap, color, 3);
+        mMap.layers().add(path);
+        path.addPoint(lastLocation);
+        Log.e("COLOR", "color was changed to " + color);
     }
 }
