@@ -123,6 +123,7 @@ public class LocationTrackerService extends Service implements
         }
     }
 
+
     @Override
     public void onConnectionSuspended(int i) {
         mGoogleApiClient.connect();
