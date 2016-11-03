@@ -7,7 +7,7 @@ import org.oscim.core.osm.Bound;
 public class DrawParameterEvents {
 
 
-    private String color;
+    private int color;
     private double thickness;
     private BoundingBox boundingBox;
 
@@ -15,7 +15,7 @@ public class DrawParameterEvents {
         return boundingBox;
     }
 
-    public DrawParameterEvents(BoundingBox bBox, String color, double thickness) {
+    public DrawParameterEvents(BoundingBox bBox, int color, double thickness) {
         this.boundingBox = bBox;
         this.color = color;
         this.thickness = thickness;
@@ -25,7 +25,7 @@ public class DrawParameterEvents {
         return thickness;
     }
 
-    public String getColor() {
+    public int getColor() {
         return color;
     }
 }

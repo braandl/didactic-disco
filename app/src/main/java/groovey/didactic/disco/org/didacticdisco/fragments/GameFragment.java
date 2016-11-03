@@ -3,10 +3,11 @@ package groovey.didactic.disco.org.didacticdisco.fragments;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.OpacityBar;
@@ -16,9 +17,12 @@ import com.larswerkman.holocolorpicker.SaturationBar;
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
 import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
 import org.oscim.core.BoundingBox;
+import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.PathLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
@@ -26,6 +30,7 @@ import org.oscim.map.ViewController;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
@@ -36,11 +41,7 @@ import javax.inject.Inject;
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
-<<<<<<< HEAD
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
-=======
-import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
->>>>>>> be32c690003cf414ccc4aa4508acacdcd411f36e
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
@@ -49,13 +50,19 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private MapPreferences mPrefs;
     private MapView mMapView = null;
 
-    private int currentDrawingColor = Color.RED;
+    private LineStyle currentLineStyle = null;
+    private GeoPoint lastLocation = null;
+
+    private PathLayer path;
+
+    private boolean doDraw = true;
 
     @Inject
     protected Session mSession;
 
     @Inject
     protected RxBus mRxBus;
+    private int currentLineColor;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -82,13 +89,25 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
+        currentLineColor = Color.RED;
+        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
+
         setupEnvironment();
         registerInfoBusses();
         addControls();
+
+
     }
 
     private void addControls() {
         addColorPickerControl();
+        addSwitchButtons();
+    }
+
+    private void addSwitchButtons() {
+        Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
+        //s.onTouchEvent();
+        doDraw = s.isChecked();
     }
 
     private void addColorPickerControl() {
@@ -107,9 +126,30 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mRxBus.register(LocationEvent.class, this::onNewLocation);
     }
 
-    //FIXME: Type
-    private <T> void onNewLocation(T t) {
+    public void testPathDrawing() {
+        this.mMap.addTask(() -> {
+            for (int i = 0; i < 10000; i++) {
+                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - ((double)i / 10000));
+                lastLocation = p;
+                if (doDraw) {
+                    path.addPoint(p);
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                mMap.updateMap(true);
 
+            }
+        });
+    }
+
+    //FIXME: Type
+    public void onNewLocation(LocationEvent e) {
+        /*Location t = e;
+        GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+        path.addPoint(p);*/
     }
 
 
@@ -149,24 +189,38 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(new LabelLayer(mMap, l));
 
 
-        /*l = new VectorTileLayer(mMap, new OsmBuildingJsonTileSource());
+        int c = Color.fade(Color.rainbow((float) (53 + 90) / 180), 0.5f);
+        path = new PathLayer(mMap, c, 3);
+        mMap.layers().add(path);
+
+        /*
+        l = new VectorTileLayer(mMap, new OsmBuildingJsonTileSource());
         l.setRenderTheme(theme);
         l.tileRenderer().setOverdrawColor(0);
         mMap.layers().add(l);
-        mMap.layers().add(new BuildingLayer(mMap, l));*/
+        mMap.layers().add(new BuildingLayer(mMap, l));
+        */
+
+
+
+
         mPrefs.clear();
 
         //FIXME: Dynamic Start Position
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
         BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
-        mRxBus.post(new DrawParameterEvents(bBox));
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, 3.0));
         mMap.setMapPosition(pos);
+
+        testPathDrawing();
     }
 
     @Override
     public void onColorChanged(int color) {
-        currentDrawingColor = color;
-        Log.e("COLOR", "color was changed");
+        currentLineColor = color;
+        path = new PathLayer(mMap, color, 3);
+        mMap.layers().add(path);
+        path.addPoint(lastLocation);
     }
 }

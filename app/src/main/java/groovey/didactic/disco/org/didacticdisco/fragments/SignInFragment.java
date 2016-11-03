@@ -1,6 +1,7 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.TextUtils;
@@ -80,6 +81,12 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
         } else
         {
             session.set(R.string.key_username, username.getText().toString());
+            //            getActivity().startService(); // TODO: Start location service
+
+            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
+            transaction.replace(R.id.content_frame, GameFragment.getInstance());
+            transaction.commit();
         }
     }
 }
