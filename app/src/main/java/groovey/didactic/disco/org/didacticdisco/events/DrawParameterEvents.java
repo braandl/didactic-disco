@@ -7,7 +7,7 @@ import org.oscim.core.osm.Bound;
  * Created by sbrandt on 03.11.16.
  */
 
-public class BoundingBoxEvent {
+public class DrawParameterEvents {
 
     private BoundingBox boundingBox;
 
@@ -15,7 +15,7 @@ public class BoundingBoxEvent {
         return boundingBox;
     }
 
-    public BoundingBoxEvent(BoundingBox bBox) {
+    public DrawParameterEvents(BoundingBox bBox) {
         this.boundingBox = bBox;
     }
 }

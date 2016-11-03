@@ -1,17 +1,21 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
+import com.larswerkman.holocolorpicker.OpacityBar;
+import com.larswerkman.holocolorpicker.SVBar;
+import com.larswerkman.holocolorpicker.SaturationBar;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
+import org.oscim.backend.canvas.Color;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
@@ -32,7 +36,7 @@ import javax.inject.Inject;
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
-import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
+import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
@@ -40,6 +44,8 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private Map mMap;
     private MapPreferences mPrefs;
     private MapView mMapView = null;
+
+    private int currentDrawingColor = Color.RED;
 
     @Inject
     protected Session mSession;
@@ -63,8 +69,6 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Activity a = getActivity();
-
         ((DiscoApplication) getActivity().getApplication()).getAppComponent().inject(this);
 
 
@@ -85,8 +89,11 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     private void addColorPickerControl() {
         ColorPicker picker = (ColorPicker) getActivity().findViewById(R.id.picker);
-
+        picker.addOpacityBar((OpacityBar) getActivity().findViewById(R.id.opacitybar));
+        picker.addSaturationBar((SaturationBar) getActivity().findViewById(R.id.saturationbar));
+        picker.addSVBar((SVBar) getActivity().findViewById(R.id.svbar));
         picker.setOnColorChangedListener(this);
+        picker.setShowOldCenterColor(false);
     }
 
     /**
@@ -149,14 +156,13 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
         BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
-
-        mRxBus.post(new BoundingBoxEvent(bBox));
-
+        mRxBus.post(new DrawParameterEvents(bBox));
         mMap.setMapPosition(pos);
     }
 
     @Override
     public void onColorChanged(int color) {
-
+        currentDrawingColor = color;
+        Log.e("COLOR", "color was changed");
     }
 }
