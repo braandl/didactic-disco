@@ -1,12 +1,15 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.transition.Slide;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.Switch;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
@@ -51,6 +54,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private MapView mMapView = null;
 
     private LineStyle currentLineStyle = null;
+    private int currentlineWidth = 3;
     private GeoPoint lastLocation = null;
 
     private PathLayer path;
@@ -64,6 +68,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     protected RxBus mRxBus;
 
     private int currentLineColor;
+    private BoundingBox bBox;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -90,25 +95,52 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
-        currentLineColor = Color.RED;
-        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
-
-        setupEnvironment();
         registerInfoBusses();
         addControls();
 
 
+        setupEnvironment();
+        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, true, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
     }
 
     private void addControls() {
         addColorPickerControl();
         addSwitchButtons();
+        addWidthSlider();
     }
 
     private void addSwitchButtons() {
         Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
-        //s.onTouchEvent();
+        s.setOnClickListener(view -> {
+            doDraw = s.isChecked();
+            lastLocation = null;
+            if (doDraw) {
+                restartWithColor(currentLineColor);
+            }
+        });
         doDraw = s.isChecked();
+    }
+
+    public void addWidthSlider() {
+        SeekBar s = (SeekBar) getActivity().findViewById(R.id.widthSlider);
+        s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                currentlineWidth = Math.max(1, i);
+                restartWithColor(currentLineColor);
+                Log.e("SEEKBAR", "value = " +i);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
     }
 
     private void addColorPickerControl() {
@@ -118,6 +150,8 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         picker.addSVBar((SVBar) getActivity().findViewById(R.id.svbar));
         picker.setOnColorChangedListener(this);
         picker.setShowOldCenterColor(false);
+
+        currentLineColor = picker.getColor();
     }
 
     /**
@@ -130,7 +164,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void testPathDrawing() {
         this.mMap.addTask(() -> {
             for (int i = 0; i < 10000; i++) {
-                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - ((double)i / 10000));
+                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - (double)(i / 10000));
                 lastLocation = p;
                 if (doDraw) {
                     path.addPoint(p);
@@ -148,9 +182,13 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     //FIXME: Type
     public void onNewLocation(LocationEvent e) {
-        /*Location t = e;
-        GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
-        path.addPoint(p);*/
+        Log.e("TAG", "we have a new position");
+        this.mMap.addTask(() -> {
+            Location t = e.getLocation();
+            GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+            path.addPoint(p);
+            mMap.updateMap(true);
+        });
     }
 
 
@@ -189,9 +227,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(l);
         mMap.layers().add(new LabelLayer(mMap, l));
 
-
-        int c = Color.fade(Color.rainbow((float) (53 + 90) / 180), 0.5f);
-        path = new PathLayer(mMap, c, 3);
+        path = new PathLayer(mMap, currentLineColor, 3);
         mMap.layers().add(path);
 
         /*
@@ -202,26 +238,32 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(new BuildingLayer(mMap, l));
         */
 
-
-
-
         mPrefs.clear();
 
         //FIXME: Dynamic Start Position
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
-        BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
+        bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
-        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, 3.0));
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
         mMap.setMapPosition(pos);
 
-        testPathDrawing();
+
+
+        //testPathDrawing();
+    }
+
+    private void restartWithColor(int color) {
+        currentLineColor = color;
+        path = new PathLayer(mMap, color, currentlineWidth);
+        mMap.layers().add(path);
+        if (lastLocation != null) {
+            path.addPoint(lastLocation);
+        }
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
     }
 
     @Override
     public void onColorChanged(int color) {
-        currentLineColor = color;
-        path = new PathLayer(mMap, color, 3);
-        mMap.layers().add(path);
-        path.addPoint(lastLocation);
+        restartWithColor(color);
     }
 }
