@@ -20,6 +20,8 @@ import com.google.android.gms.location.LocationServices;
 
 import org.oscim.core.BoundingBox;
 
+import java.util.ArrayList;
+
 import javax.inject.Inject;
 
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
@@ -29,6 +31,8 @@ import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.network.ApiManager;
+import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
+import groovey.didactic.disco.org.didacticdisco.network.LineRequest;
 
 
 public class LocationTrackerService extends Service implements
@@ -50,7 +54,9 @@ public class LocationTrackerService extends Service implements
 
     private GoogleApiClient mGoogleApiClient;
 
-    private BoundingBox bBox;
+    private DrawParameterEvents drawParamEvent;
+
+    private Coordinate old;
 
     @Override
     public void onCreate() {
@@ -61,7 +67,7 @@ public class LocationTrackerService extends Service implements
     }
 
     private void onBoundingBox(DrawParameterEvents bBoxEvent) {
-        bBox = bBoxEvent.getBoundingBox();
+        drawParamEvent = bBoxEvent;
     }
 
     @Override
@@ -95,20 +101,44 @@ public class LocationTrackerService extends Service implements
     public void onLocationChanged(Location location) {
         LocationEvent loctionEvent = new LocationEvent(location);
         mRxBus.post(loctionEvent);
-        String id = mSession.get(R.string.key_uuid, "");
-        //String nick = mSession.get(R.string.key_username, "");
-        /*
-        Line line = new Line(
-                id,
-                nick,
-                coordinates,
-                bbox,
-                thickness,
-                color
+
+        Coordinate current = new Coordinate(
+                location.getLatitude(),
+                location.getLongitude()
         );
 
-        mApiManager.postLine(line);
-                */
+        String id = mSession.get(R.string.key_uuid, "");
+        String nick = mSession.get(R.string.key_username, "");
+
+
+        if (old != null && drawParamEvent != null) {
+
+            BoundingBox viewBBox = drawParamEvent.getBoundingBox();
+            double north = viewBBox.getMaxLatitude();
+            double south = viewBBox.getMinLatitude();
+            double east = viewBBox.getMaxLongitude();
+            double west = viewBBox.getMinLongitude();
+
+            Coordinate bottomLeft = new Coordinate(south, west);
+            Coordinate topRight = new Coordinate(north, east);
+
+            ArrayList<Coordinate> box = new ArrayList<>();
+            box.add(bottomLeft);
+            box.add(topRight);
+
+            ArrayList<Coordinate> coordinates = new ArrayList<>();
+            coordinates.add(old);
+            coordinates.add(current);
+            LineRequest lineRequest = new LineRequest(
+                    id,
+                    nick,
+                    coordinates,
+                    box,
+                    drawParamEvent.getThickness(),
+                    drawParamEvent.getColor()
+            );
+            mApiManager.postLine(lineRequest);
+        }
     }
 
     @Override
