@@ -10,8 +10,34 @@
 
     <com.larswerkman.holocolorpicker.ColorPicker
         android:id="@+id/picker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="0dp"
+        android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"/>
+    <com.larswerkman.holocolorpicker.OpacityBar
+        android:id="@+id/opacitybar"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/picker"
+        android:layout_marginRight="10dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="5dp"/>
+    <com.larswerkman.holocolorpicker.SVBar
+        android:id="@+id/svbar"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/opacitybar"
+        android:layout_marginRight="10dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="5dp"/>
+    <com.larswerkman.holocolorpicker.SaturationBar
+        android:id="@+id/saturationbar"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/svbar"
+        android:layout_marginRight="10dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_marginTop="5dp"/>
 </RelativeLayout>
