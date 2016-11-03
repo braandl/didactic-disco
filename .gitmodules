@@ -1,6 +1,3 @@
-[submodule "vtm"]
-	path = vtm
-	url = https://github.com/schudt/vtm.git
 [submodule "vtm-src"]
 	path = vtm-src
 	url = https://github.com/schudt/vtm.git

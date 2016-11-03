@@ -1,1 +1,1 @@
-include ':app', ':vtm-themes', ':vtm-android', ':vtm', ':vtm-extras'
+include ':app'
