@@ -19,5 +19,4 @@ public interface AppComponent {
     // services
     void inject(LocationTrackerService locationTrackerService);
     void inject(ApiManager apiManager);
-
 }
