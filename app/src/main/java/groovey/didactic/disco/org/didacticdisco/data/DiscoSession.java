@@ -1,32 +1,22 @@
 package groovey.didactic.disco.org.didacticdisco.data;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Build;
 
 import java.util.HashMap;
 import java.util.Map;
-import timber.log.Timber;
+import java.util.UUID;
+
+import groovey.didactic.disco.org.didacticdisco.R;
 
 
 public final class DiscoSession implements Session {
-
-    public static String MODEL = Build.MANUFACTURER + " " + Build.MODEL;
-
-    public static String OS_VERSION = Build.VERSION.RELEASE;
-
-    private final Context mContext;
 
     private final Map<Integer, Object> mCache;
 
     private final PersistentData mPersistentData;
 
-    private Intent mTracker;
-
     public DiscoSession(final Context context, final PersistentData persistentData) {
-        mContext = context;
         mPersistentData = persistentData;
         mCache = new HashMap<>();
         initialize();
@@ -162,17 +152,9 @@ public final class DiscoSession implements Session {
      * version name and version code
      */
     private void initialize() {
-        try {
-            final PackageInfo pInfo = mContext.getPackageManager()
-                    .getPackageInfo(mContext.getPackageName(), 0);
-            //mCache.put(R.string.io_app_version_name, pInfo.versionName);
-            //mCache.put(R.string.io_app_version_code, pInfo.versionCode);
-            //String uuid = get(R.string.user_uuid, "");
-            //if (uuid.equals("")) {
-            //    store(R.string.user_uuid, UUID.randomUUID().toString());
-            //}
-        } catch (final PackageManager.NameNotFoundException e) {
-            Timber.e(e.getMessage());
+        String uuid = get(R.string.key_uuid, "");
+        if (uuid.equals("")) {
+            store(R.string.key_uuid, UUID.randomUUID().toString());
         }
     }
 
