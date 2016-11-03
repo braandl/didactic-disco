@@ -37,6 +37,7 @@ import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
+import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
 public class GameFragment extends Fragment implements ColorMixer.OnColorChangedListener {
