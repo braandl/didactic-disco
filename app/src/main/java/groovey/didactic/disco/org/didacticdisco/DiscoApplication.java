@@ -7,6 +7,7 @@ import groovey.didactic.disco.org.didacticdisco.injections.components.AppCompone
 import groovey.didactic.disco.org.didacticdisco.injections.components.DaggerAppComponent;
 import groovey.didactic.disco.org.didacticdisco.injections.modules.AppModule;
 import groovey.didactic.disco.org.didacticdisco.injections.modules.NetModule;
+import timber.log.Timber;
 
 import static groovey.didactic.disco.org.didacticdisco.data.Constants.URL;
 
@@ -17,6 +18,11 @@ public class DiscoApplication extends Application {
 
     @Override
     public void onCreate() {
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        } else {
+            //TODO: Timber.plant(// Library here e.g. Crashlytics);
+        }
         initComponents();
     }
 

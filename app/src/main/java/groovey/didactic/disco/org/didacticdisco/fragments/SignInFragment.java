@@ -1,10 +1,16 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -25,6 +31,9 @@ import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
 public class SignInFragment extends Fragment implements TextView.OnEditorActionListener
 {
+
+    private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
+
     @BindView(R.id.username) TextView username;
     @Inject                  Session  session;
 
@@ -80,15 +89,37 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
         {// Check for a valid username.
             username.setError(getString(R.string.error_field_required));
             username.requestFocus();
-        } else
-        {
+        } else {
             session.set(R.string.key_username, username.getText().toString());
-            getActivity().startService(new Intent(getActivity(), LocationTrackerService.class)); // TODO: Start location service
-
+            if (hasLocationPermission()) {
+                getActivity().startService(new Intent(getActivity(), LocationTrackerService.class));
+            } else {
+                getLocationPermissions();
+            }
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
             transaction.replace(R.id.content_frame, GameFragment.getInstance());
             transaction.commit();
+        }
+    }
+
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void getLocationPermissions() {
+        requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_REQUEST_FINE_LOCATION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int code, @Nullable String permissions[], @Nullable int[] res) {
+        switch (code) {
+            case PERMISSION_REQUEST_FINE_LOCATION:
+                getActivity().startService(new Intent(getActivity(), LocationTrackerService.class));
         }
     }
 }
