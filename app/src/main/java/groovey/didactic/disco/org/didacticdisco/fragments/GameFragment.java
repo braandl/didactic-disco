@@ -1,10 +1,10 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
@@ -106,7 +106,13 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     private void addSwitchButtons() {
         Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
-        //s.onTouchEvent();
+        s.setOnClickListener(view -> {
+            doDraw = s.isChecked();
+            lastLocation = null;
+            if (doDraw) {
+                restartWithColor(currentLineColor);
+            }
+        });
         doDraw = s.isChecked();
     }
 
@@ -129,7 +135,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void testPathDrawing() {
         this.mMap.addTask(() -> {
             for (int i = 0; i < 10000; i++) {
-                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - ((double)i / 10000));
+                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - (double)(i / 10000));
                 lastLocation = p;
                 if (doDraw) {
                     path.addPoint(p);
@@ -147,9 +153,12 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     //FIXME: Type
     public void onNewLocation(LocationEvent e) {
-        /*Location t = e;
-        GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
-        path.addPoint(p);*/
+        this.mMap.addTask(() -> {
+            Location t = e.getLocation();
+            GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+            path.addPoint(p);
+            mMap.updateMap(true);
+        });
     }
 
 
@@ -201,9 +210,6 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         mMap.layers().add(new BuildingLayer(mMap, l));
         */
 
-
-
-
         mPrefs.clear();
 
         //FIXME: Dynamic Start Position
@@ -216,11 +222,17 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         testPathDrawing();
     }
 
-    @Override
-    public void onColorChanged(int color) {
+    private void restartWithColor(int color) {
         currentLineColor = color;
         path = new PathLayer(mMap, color, 3);
         mMap.layers().add(path);
-        path.addPoint(lastLocation);
+        if (lastLocation != null) {
+            path.addPoint(lastLocation);
+        }
+    }
+
+    @Override
+    public void onColorChanged(int color) {
+        restartWithColor(color);
     }
 }

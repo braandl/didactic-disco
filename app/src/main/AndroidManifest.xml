@@ -22,8 +22,9 @@
 
         <service
             android:name=".services.LocationTrackerService"
+            android:permission="android.permission.ACCESS_FINE_LOCATION"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true" />
     </application>
 
 </manifest>

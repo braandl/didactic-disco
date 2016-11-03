@@ -11,6 +11,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -143,8 +144,10 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        Log.d("WAHH", "FUCK NO");
         boolean isGranted = checkLocationPermission();
         if (isGranted) {
+            Log.d("WAHH", "FUCK YEAH");
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient,
                     getLocationRequest(),
