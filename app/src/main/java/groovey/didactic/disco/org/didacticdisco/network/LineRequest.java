@@ -15,14 +15,14 @@ public class LineRequest {
 
     private double thickness;
 
-    private String color;
+    private int color;
 
     public LineRequest(String id,
                        String nick,
                        ArrayList<Coordinate> coordinates,
                        ArrayList<Coordinate> bbox,
                        double thickness,
-                       String color) {
+                       int color) {
         this.id = id;
         this.nick = nick;
         this.coordinates = coordinates;

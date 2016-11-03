@@ -2,6 +2,7 @@ package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.text.TextUtils;
@@ -20,6 +21,7 @@ import butterknife.OnClick;
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
+import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
 public class SignInFragment extends Fragment implements TextView.OnEditorActionListener
 {
@@ -81,7 +83,7 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
         } else
         {
             session.set(R.string.key_username, username.getText().toString());
-            //            getActivity().startService(); // TODO: Start location service
+            getActivity().startService(new Intent(getActivity(), LocationTrackerService.class)); // TODO: Start location service
 
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
