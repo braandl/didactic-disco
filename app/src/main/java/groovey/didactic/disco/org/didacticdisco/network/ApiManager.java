@@ -10,6 +10,7 @@ import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import retrofit2.Call;
 import retrofit2.Retrofit;
+import timber.log.Timber;
 
 
 public class ApiManager {

@@ -2,6 +2,7 @@ package groovey.didactic.disco.org.didacticdisco.services;
 
 import android.Manifest;
 import android.app.Application;
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -10,7 +11,9 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -33,6 +36,8 @@ import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.network.ApiManager;
 import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
 import groovey.didactic.disco.org.didacticdisco.network.LineRequest;
+import groovey.didactic.disco.org.didacticdisco.utils.NotificationUtils;
+import timber.log.Timber;
 
 
 public class LocationTrackerService extends Service implements
@@ -62,7 +67,7 @@ public class LocationTrackerService extends Service implements
     public void onCreate() {
         super.onCreate();
         ((DiscoApplication) this.getApplicationContext()).getAppComponent().inject(this);
-        mRxBus.register(DrawParameterEvents.class, this::onBoundingBox);
+
         mGoogleApiClient = getApiClient();
     }
 
@@ -72,7 +77,12 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Timber.d("service started");
         mGoogleApiClient.connect();
+        mRxBus.register(DrawParameterEvents.class, this::onBoundingBox);
+        int nId = NotificationUtils.notify(mApplication, NotificationUtils.TRACKING_RUNNING);
+        Notification mNotification = NotificationUtils.getCurrentTrackingNotification();
+        this.startForeground(nId, mNotification);
         return START_REDELIVER_INTENT;
     }
 
@@ -94,7 +104,7 @@ public class LocationTrackerService extends Service implements
         return LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000)
-                .setFastestInterval(1000);
+                .setFastestInterval(500);
     }
 
     @Override
@@ -107,10 +117,14 @@ public class LocationTrackerService extends Service implements
                 location.getLongitude()
         );
 
+        Timber.d("lat=%s, lon=%s",
+                location.getLatitude(),
+                location.getLongitude());
+
         String id = mSession.get(R.string.key_uuid, "");
         String nick = mSession.get(R.string.key_username, "");
 
-
+        Timber.d("draw = %s, old = %s", drawParamEvent != null, old);
         if (old != null && drawParamEvent != null) {
 
             BoundingBox viewBBox = drawParamEvent.getBoundingBox();
@@ -137,20 +151,30 @@ public class LocationTrackerService extends Service implements
                     drawParamEvent.getThickness(),
                     drawParamEvent.getColor()
             );
+            Log.e(getClass().getSimpleName(), "Posting line");
             mApiManager.postLine(lineRequest);
         }
+        old = current;
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        boolean isGranted = checkLocationPermission();
-        if (isGranted) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient,
-                    getLocationRequest(),
-                    this
-            );
+        Timber.d("connected");
+        //boolean isGranted = checkLocationPermission();
+        //Timber.d("%s", isGranted);
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
         }
+        Timber.d("Did succeed");
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient,
+                getLocationRequest(),
+                this
+        );
+
     }
 
 
@@ -168,9 +192,10 @@ public class LocationTrackerService extends Service implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {}
 
-
+    /*
     public boolean checkLocationPermission() {
         int permissionCheck = ContextCompat.checkSelfPermission(mApplication, Manifest.permission.ACCESS_FINE_LOCATION);
         return permissionCheck == PackageManager.PERMISSION_GRANTED;
     }
+    */
 }

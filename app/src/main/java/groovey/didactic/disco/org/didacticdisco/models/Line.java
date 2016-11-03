@@ -9,6 +9,8 @@ public class Line {
     private List<Coordinate> line;
     private long timestamp;
     private String nick;
+    private int color;
+    private double thickness;
 
     public long getTimestamp() {
         return timestamp;

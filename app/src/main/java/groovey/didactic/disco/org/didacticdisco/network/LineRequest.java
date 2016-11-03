@@ -3,6 +3,7 @@ package groovey.didactic.disco.org.didacticdisco.network;
 
 import java.util.ArrayList;
 
+
 public class LineRequest {
 
     private String id;
