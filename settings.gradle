@@ -1,1 +1,5 @@
-include ':app'
+include ':app', ':vtm-themes', ':vtm-android', ':vtm', ':vtm-extras'
+project(':vtm-extras').projectDir = new File('vtm-src/vtm-extras')
+project(':vtm-themes').projectDir = new File('vtm-src/vtm-themes')
+project(':vtm-android').projectDir = new File('vtm-src/vtm-android')
+project(':vtm').projectDir = new File('vtm-src/vtm')

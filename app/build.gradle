@@ -27,10 +27,10 @@ android {
 dependencies {
 
     compile 'com.android.support:multidex:1.0.0'
-    /*compile project(':vtm')
+    compile project(':vtm')
     compile project(':vtm-themes')
     compile project(':vtm-android')
-    compile project(':vtm-extras')*/
+    /*compile project(':vtm-extras')*/
     // view and class injections
     compile 'com.jakewharton:butterknife:8.4.0'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
