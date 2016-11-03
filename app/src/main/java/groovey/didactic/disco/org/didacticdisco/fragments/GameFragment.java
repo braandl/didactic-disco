@@ -1,5 +1,6 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -7,16 +8,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.commonsware.cwac.colormixer.ColorMixer;
-import com.commonsware.cwac.colormixer.ColorMixerDialog;
+import com.larswerkman.holocolorpicker.ColorPicker;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
-import org.oscim.backend.canvas.Color;
 import org.oscim.core.BoundingBox;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
-import org.oscim.layers.tile.buildings.BuildingLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
@@ -24,12 +22,10 @@ import org.oscim.map.ViewController;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
-import org.oscim.tiling.source.geojson.OsmBuildingJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmWaterJsonTileSource;
-import org.oscim.tiling.source.mapfile.MapInfo;
 
 import javax.inject.Inject;
 
@@ -37,9 +33,10 @@ import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.BoundingBoxEvent;
+import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 
-public class GameFragment extends Fragment implements ColorMixer.OnColorChangedListener {
+public class GameFragment extends Fragment implements ColorPicker.OnColorChangedListener {
     private Map mMap;
     private MapPreferences mPrefs;
     private MapView mMapView = null;
@@ -65,8 +62,11 @@ public class GameFragment extends Fragment implements ColorMixer.OnColorChangedL
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        ((DiscoApplication) getActivity().getApplicationContext()).getAppComponent().inject(this);
         super.onCreate(savedInstanceState);
+        Activity a = getActivity();
+
+        ((DiscoApplication) getActivity().getApplication()).getAppComponent().inject(this);
+
 
     }
 
@@ -76,10 +76,17 @@ public class GameFragment extends Fragment implements ColorMixer.OnColorChangedL
         super.onResume();
         setupEnvironment();
         registerInfoBusses();
+        addControls();
+    }
 
+    private void addControls() {
+        addColorPickerControl();
+    }
 
-        //new ColorMixerDialog(getActivity(), Color.WHITE, this).show();
+    private void addColorPickerControl() {
+        ColorPicker picker = (ColorPicker) getActivity().findViewById(R.id.picker);
 
+        picker.setOnColorChangedListener(this);
     }
 
     /**
@@ -93,6 +100,7 @@ public class GameFragment extends Fragment implements ColorMixer.OnColorChangedL
     private <T> void onNewLocation(T t) {
 
     }
+
 
     public void onPause() {
         super.onPause();
@@ -148,8 +156,7 @@ public class GameFragment extends Fragment implements ColorMixer.OnColorChangedL
     }
 
     @Override
-    public void onColorChange(int i) {
+    public void onColorChanged(int color) {
 
     }
-
 }
