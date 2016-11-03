@@ -4,9 +4,12 @@ import android.app.Fragment;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.transition.Slide;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.Switch;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
@@ -65,6 +68,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     protected RxBus mRxBus;
 
     private int currentLineColor;
+    private BoundingBox bBox;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -96,12 +100,13 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
 
         setupEnvironment();
-        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, false, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
+        currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, true, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
     }
 
     private void addControls() {
         addColorPickerControl();
         addSwitchButtons();
+        addWidthSlider();
     }
 
     private void addSwitchButtons() {
@@ -114,6 +119,28 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
             }
         });
         doDraw = s.isChecked();
+    }
+
+    public void addWidthSlider() {
+        SeekBar s = (SeekBar) getActivity().findViewById(R.id.widthSlider);
+        s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                currentlineWidth = Math.max(1, i);
+                restartWithColor(currentLineColor);
+                Log.e("SEEKBAR", "value = " +i);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
     }
 
     private void addColorPickerControl() {
@@ -155,6 +182,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     //FIXME: Type
     public void onNewLocation(LocationEvent e) {
+        Log.e("TAG", "we have a new position");
         this.mMap.addTask(() -> {
             Location t = e.getLocation();
             GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
@@ -214,10 +242,12 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
         //FIXME: Dynamic Start Position
         MapPosition pos = new MapPosition(52.5444644, 13.3532383, 1);
-        BoundingBox bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
+        bBox = new BoundingBox(52.543315481374954, 13.350890769620161, 52.54528069248375,13.354436963538177);
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
         mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
         mMap.setMapPosition(pos);
+
+
 
         //testPathDrawing();
     }
@@ -229,6 +259,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         if (lastLocation != null) {
             path.addPoint(lastLocation);
         }
+        mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
     }
 
     @Override
