@@ -34,8 +34,8 @@ public class ApiManager {
     // Requests
     ///////////
 
-    public Call<DrawingsResponse> postLine(Line line) {
-        Call<DrawingsResponse> call = mDiscoService.postLine(line);
+    public Call<DrawResponse> postLine(LineRequest lineRequest) {
+        Call<DrawResponse> call = mDiscoService.postLine(lineRequest);
         call.enqueue(new DrawingCallback());
         return call;
     }
@@ -44,20 +44,20 @@ public class ApiManager {
     // Callbacks
     ////////////
 
-    public class DrawingCallback extends AbstractRetrofitCallback<DrawingsResponse> {
+    public class DrawingCallback extends AbstractRetrofitCallback<DrawResponse> {
 
         DrawingCallback() {
             super(mRetrofit);
         }
 
         @Override
-        protected void onSuccess(DrawingsResponse response) {
-            mRxBus.post(new OnDrawingsEvent(response));
+        protected void onSuccess(DrawResponse response) {
+            mRxBus.post(new OnDrawEvent(response));
         }
 
         @Override
         protected void onFailure(Throwable throwable) {
-            mRxBus.post(new OnDrawingsEvent(throwable));
+            mRxBus.post(new OnDrawEvent(throwable));
         }
     }
 
