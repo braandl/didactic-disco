@@ -45,7 +45,6 @@ public class NetModule {
     public Gson provideGson() {
         return new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-                .excludeFieldsWithoutExposeAnnotation()
                 .create();
     }
 
@@ -69,7 +68,6 @@ public class NetModule {
 
     @Provides
     @Singleton
-    @Named("CiboRetrofit")
     public Retrofit provideCiboRetrofit(Gson gson, OkHttpClient okHttpClient) {
         return new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create(gson))
@@ -80,17 +78,7 @@ public class NetModule {
 
     @Provides
     @Singleton
-    @Named("SensorRetrofit")
-    public Retrofit provideSensorRetrofit(OkHttpClient okHttpClient) {
-        return new Retrofit.Builder()
-                .baseUrl(mBaseUrl)
-                .client(okHttpClient)
-                .build();
-    }
-
-    @Provides
-    @Singleton
-    public DiscoService provideCiBoService(@Named("CiboRetrofit") Retrofit retrofit) {
+    public DiscoService provideCiBoService(Retrofit retrofit) {
         return retrofit.create(DiscoService.class);
     }
 
