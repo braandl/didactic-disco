@@ -1,6 +1,7 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.app.Fragment;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -16,9 +17,12 @@ import com.larswerkman.holocolorpicker.SaturationBar;
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
 import org.oscim.backend.canvas.Color;
+import org.oscim.backend.canvas.Paint;
 import org.oscim.core.BoundingBox;
+import org.oscim.core.GeoPoint;
 import org.oscim.core.MapPosition;
 import org.oscim.core.Tile;
+import org.oscim.layers.PathLayer;
 import org.oscim.layers.tile.vector.VectorTileLayer;
 import org.oscim.layers.tile.vector.labeling.LabelLayer;
 import org.oscim.map.Map;
@@ -26,6 +30,7 @@ import org.oscim.map.ViewController;
 import org.oscim.theme.IRenderTheme;
 import org.oscim.theme.ThemeLoader;
 import org.oscim.theme.VtmThemes;
+import org.oscim.theme.styles.LineStyle;
 import org.oscim.tiling.source.geojson.OsmLanduseJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLabelJsonTileSource;
 import org.oscim.tiling.source.geojson.OsmRoadLineJsonTileSource;
@@ -45,7 +50,10 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private MapPreferences mPrefs;
     private MapView mMapView = null;
 
-    private int currentDrawingColor = Color.RED;
+    private LineStyle currentLineStyle = new LineStyle(1, 1);
+    private Location lastLocation = null;
+
+    private PathLayer path;
 
     @Inject
     protected Session mSession;
@@ -104,8 +112,10 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     }
 
     //FIXME: Type
-    private <T> void onNewLocation(T t) {
-
+    public void onNewLocation(LocationEvent e) {
+        Location t = e.
+        GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+        path.addPoint(p);
     }
 
 
@@ -158,11 +168,15 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
         mRxBus.post(new DrawParameterEvents(bBox));
         mMap.setMapPosition(pos);
+
+        path = new PathLayer(mMap, Color.RED);
+        
     }
 
     @Override
     public void onColorChanged(int color) {
-        currentDrawingColor = color;
+        new LineStyle(1, currentLineStyle.style, color, currentLineStyle.width, currentLineStyle.cap, currentLineStyle.fixed, currentLineStyle.stipple, currentLineStyle.stippleColor, currentLineStyle.stippleWidth, currentLineStyle.fadeScale, currentLineStyle.blur, currentLineStyle.outline, currentLineStyle.texture, currentLineStyle.randomOffset);
+        path.setStyle(currentLineStyle);
         Log.e("COLOR", "color was changed");
     }
 }
