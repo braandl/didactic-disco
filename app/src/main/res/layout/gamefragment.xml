@@ -51,13 +51,24 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="20dp"
-        android:text="Drawing"/>
+        android:layout_marginLeft="10dp"
+        android:textColor="#ffffff"
+        android:text="drawing"/>
     <SeekBar
         android:id="@+id/widthSlider"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:max="25"
         android:layout_below="@+id/doDrawSwitch"
-
     />
+    <TextView
+        android:id="@+id/username"
+        android:layout_width="150dp"
+        android:layout_height="20dp"
+        android:textColor="#ffffff"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="10dp"
+        />
 </RelativeLayout>

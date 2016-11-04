@@ -5,11 +5,13 @@ import android.annotation.TargetApi;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.OpacityBar;
@@ -132,25 +135,36 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         addColorPickerControl();
         addSwitchButtons();
         addWidthSlider();
+        addUsername();
     }
 
     private void addSwitchButtons() {
         Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
+
         s.setOnClickListener(view -> {
             doDraw = s.isChecked();
             lastLocation = null;
             if (doDraw) {
                 startService();
                 restartWithColor(currentLineColor);
+                s.setText("drawing");
             } else {
                 stopService();
+                s.setText("paused");
             }
         });
         doDraw = s.isChecked();
     }
 
+    public void addUsername() {
+        TextView t = (TextView) getActivity().findViewById(R.id.username);
+        t.setText(mSession.get(R.string.key_username, ""));
+    }
+
     public void addWidthSlider() {
         SeekBar s = (SeekBar) getActivity().findViewById(R.id.widthSlider);
+        //s.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
+        //s.getThumb().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
         s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
