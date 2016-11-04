@@ -247,7 +247,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         vc.setTilt(0);
         vc.setMaxZoomLevel(21);
 
-        IRenderTheme theme = ThemeLoader.load(VtmThemes.DEFAULT);
+        IRenderTheme theme = ThemeLoader.load(VtmThemes.NEWTRON);
 
         mMap.setBaseMap(new VectorTileLayer(mMap, new OsmLanduseJsonTileSource()));
         mMap.setTheme(theme);
