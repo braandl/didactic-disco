@@ -1,3 +1,6 @@
 [submodule "vtm-src"]
 	path = vtm-src
 	url = https://github.com/schudt/vtm.git
+[submodule "didactic-disco-server"]
+	path = didactic-disco-server
+	url = https://github.com/blackhorrorsheep/drawserver.git
