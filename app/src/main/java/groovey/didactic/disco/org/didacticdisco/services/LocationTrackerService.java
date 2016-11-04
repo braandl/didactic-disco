@@ -4,20 +4,24 @@ import android.Manifest;
 import android.app.Application;
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.GnssMeasurementsEvent;
+import android.location.GnssNavigationMessage;
+import android.location.GnssStatus;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
@@ -43,6 +47,7 @@ import timber.log.Timber;
 public class LocationTrackerService extends Service implements
         LocationListener,
         GoogleApiClient.ConnectionCallbacks,
+        GnssListener,
         GoogleApiClient.OnConnectionFailedListener {
 
     @Inject
@@ -62,6 +67,7 @@ public class LocationTrackerService extends Service implements
     private DrawParameterEvents drawParamEvent;
 
     private Coordinate old;
+    private GnssContainer container;
 
     @Override
     public void onCreate() {
@@ -83,12 +89,17 @@ public class LocationTrackerService extends Service implements
         int nId = NotificationUtils.notify(mApplication, NotificationUtils.TRACKING_RUNNING);
         Notification mNotification = NotificationUtils.getCurrentTrackingNotification();
         this.startForeground(nId, mNotification);
+
+        runWithGalileo();
         return START_REDELIVER_INTENT;
     }
 
     @Override
     public void onDestroy() {
         mGoogleApiClient.disconnect();
+        if (container != null) {
+            container.unregisterAll();
+        }
         super.onDestroy();
     }
 
@@ -101,10 +112,24 @@ public class LocationTrackerService extends Service implements
     }
 
     private LocationRequest getLocationRequest() {
+
+
+
+
         return LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(1000)
                 .setFastestInterval(500);
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+
     }
 
     @Override
@@ -159,6 +184,63 @@ public class LocationTrackerService extends Service implements
     }
 
     @Override
+    public void onStatusChanged(String s, int i, Bundle bundle) {
+
+    }
+
+    @Override
+    public void onLocationStatusChanged(String provider, int status, Bundle extras) {
+        Timber.e("Status changed");
+    }
+
+    @Override
+    public void onGnssMeasurementsReceived(GnssMeasurementsEvent event) {
+        Timber.e("onGnssMeasurementsReceived");
+    }
+
+    @Override
+    public void onGnssMeasurementsStatusChanged(int status) {
+        Timber.e("onGnssMeasurementsStatusChanged");
+    }
+
+    @Override
+    public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {
+        Timber.e("onGnssNavigationMessageReceived");
+    }
+
+    @Override
+    public void onGnssNavigationMessageStatusChanged(int status) {
+        Timber.e("onGnssNavigationMessageStatusChanged");
+    }
+
+    @Override
+    public void onGnssStatusChanged(GnssStatus gnssStatus) {
+        Timber.e("onGnssStatusChanged");
+    }
+
+    @Override
+    public void onListenerRegistration(String listener, boolean result) {
+
+    }
+
+    @Override
+    public void onNmeaReceived(long l, String s) {
+
+    }
+
+    private void runWithGalileo() {
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Timber.d("Did succeed");
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
+    }
+
+    @Override
     public void onConnected(Bundle bundle) {
         Timber.d("connected");
         //boolean isGranted = checkLocationPermission();
@@ -170,12 +252,14 @@ public class LocationTrackerService extends Service implements
             return;
         }
         Timber.d("Did succeed");
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient,
-                getLocationRequest(),
-                this
-        );
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
 
+        /*LocationServices.FusedLocationApi.requestLocationUpdates(
+                       mGoogleApiClient,
+                          getLocationRequest(),
+                this
+              );*/
     }
 
 

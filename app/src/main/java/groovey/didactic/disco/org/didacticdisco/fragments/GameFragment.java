@@ -210,7 +210,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     }
 
     public void onNewLocation(LocationEvent e) {
-        Log.e("TAG", "we have a new position");
+        Log.e("TAG", "we have a new position " + e.toString());
         this.mMap.addTask(() -> {
             Location t = e.getLocation();
             GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
@@ -247,10 +247,11 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         vc.setTilt(0);
         vc.setMaxZoomLevel(21);
 
-        IRenderTheme theme = ThemeLoader.load(VtmThemes.DEFAULT);
+        IRenderTheme theme = ThemeLoader.load(VtmThemes.NEWTRON);
 
         mMap.setBaseMap(new VectorTileLayer(mMap, new OsmLanduseJsonTileSource()));
         mMap.setTheme(theme);
+
 
         VectorTileLayer l = new VectorTileLayer(mMap, new OsmWaterJsonTileSource());
         l.setRenderTheme(theme);
