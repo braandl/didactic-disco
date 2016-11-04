@@ -2,14 +2,16 @@ package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Dialog;
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
@@ -29,7 +31,7 @@ import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
-public class SignInFragment extends Fragment implements TextView.OnEditorActionListener
+public class SignInFragment extends DialogFragment implements TextView.OnEditorActionListener
 {
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
@@ -91,7 +93,7 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
             username.requestFocus();
         } else {
             session.set(R.string.key_username, username.getText().toString());
-            FragmentTransaction transaction = getFragmentManager().beginTransaction();
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
             transaction.replace(R.id.content_frame, GameFragment.getInstance());
             transaction.commit();
