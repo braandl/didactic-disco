@@ -60,7 +60,7 @@
         android:layout_width="150dp"
         android:layout_height="20dp"
         android:textColor="#ffffff"
-        android:text="thickness"
+        android:text="line thickness"
         android:layout_below="@+id/doDrawSwitch"
         android:layout_alignParentLeft="true"
         android:layout_marginTop="10dp"
