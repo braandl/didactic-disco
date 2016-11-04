@@ -72,6 +72,7 @@ dependencies {
     compile project(path: ':vtm-extras')
     // Color Mixer
     compile 'com.larswerkman:HoloColorPicker:1.5'
+    compile 'com.roger.catloadinglibrary:catloadinglibrary:1.0.1'
 }
 
 apply plugin: 'me.tatarka.retrolambda'

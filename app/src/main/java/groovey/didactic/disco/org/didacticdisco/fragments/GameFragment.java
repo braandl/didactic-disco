@@ -2,26 +2,26 @@ package groovey.didactic.disco.org.didacticdisco.fragments;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.StrictMode;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
-import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.larswerkman.holocolorpicker.ColorPicker;
 import com.larswerkman.holocolorpicker.OpacityBar;
 import com.larswerkman.holocolorpicker.SVBar;
 import com.larswerkman.holocolorpicker.SaturationBar;
+import com.roger.catloadinglibrary.CatLoadingView;
 
 import org.oscim.android.MapPreferences;
 import org.oscim.android.MapView;
@@ -52,14 +52,13 @@ import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
-import groovey.didactic.disco.org.didacticdisco.events.OnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.models.Line;
 import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
 import groovey.didactic.disco.org.didacticdisco.network.DrawResponse;
 import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
-public class GameFragment extends Fragment implements ColorPicker.OnColorChangedListener {
+public class GameFragment extends DialogFragment implements ColorPicker.OnColorChangedListener {
 
     private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
     private Map mMap;
@@ -83,6 +82,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     private int currentLineColor;
     private BoundingBox bBox;
     private Intent service;
+    private CatLoadingView mLoadView;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -105,6 +105,9 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onResume()
     {
         super.onResume();
+
+        showLoadingDialog();
+
         registerInfoBusses();
         addControls();
 
@@ -112,6 +115,11 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
         setupEnvironment();
         currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, true, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
+    }
+
+    private void showLoadingDialog() {
+        mLoadView = new CatLoadingView();
+        mLoadView.show(getActivity().getSupportFragmentManager(), "");
     }
 
     private void startService() {
@@ -132,25 +140,36 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         addColorPickerControl();
         addSwitchButtons();
         addWidthSlider();
+        addUsername();
     }
 
     private void addSwitchButtons() {
         Switch s = (Switch) getActivity().findViewById(R.id.doDrawSwitch);
+
         s.setOnClickListener(view -> {
             doDraw = s.isChecked();
             lastLocation = null;
             if (doDraw) {
                 startService();
                 restartWithColor(currentLineColor);
+                s.setText("drawing");
             } else {
                 stopService();
+                s.setText("paused");
             }
         });
         doDraw = s.isChecked();
     }
 
+    public void addUsername() {
+        TextView t = (TextView) getActivity().findViewById(R.id.username);
+        t.setText(mSession.get(R.string.key_username, ""));
+    }
+
     public void addWidthSlider() {
         SeekBar s = (SeekBar) getActivity().findViewById(R.id.widthSlider);
+        //s.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
+        //s.getThumb().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
         s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -210,13 +229,16 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     }
 
     public void onNewLocation(LocationEvent e) {
+        mLoadView.dismiss();
+        Location t = e.getLocation();
         Log.e("TAG", "we have a new position " + e.toString());
+        final GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
         this.mMap.addTask(() -> {
-            Location t = e.getLocation();
-            GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+
             path.addPoint(p);
             mMap.updateMap(true);
         });
+        mMap.animator().animateTo(p);
     }
 
     public void onNewDrawEvent(DrawResponse response) {
