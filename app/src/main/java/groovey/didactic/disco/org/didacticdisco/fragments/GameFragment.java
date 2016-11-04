@@ -46,7 +46,11 @@ import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
+import groovey.didactic.disco.org.didacticdisco.events.OnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
+import groovey.didactic.disco.org.didacticdisco.models.Line;
+import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
+import groovey.didactic.disco.org.didacticdisco.network.DrawResponse;
 
 public class GameFragment extends Fragment implements ColorPicker.OnColorChangedListener {
     private Map mMap;
@@ -87,8 +91,6 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ((DiscoApplication) getActivity().getApplication()).getAppComponent().inject(this);
-
-
     }
 
     @Override
@@ -159,6 +161,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
      */
     public void registerInfoBusses() {
         mRxBus.register(LocationEvent.class, this::onNewLocation);
+        mRxBus.register(DrawResponse.class, this::onNewDrawEvent);
     }
 
     public void testPathDrawing() {
@@ -180,7 +183,6 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         });
     }
 
-    //FIXME: Type
     public void onNewLocation(LocationEvent e) {
         Log.e("TAG", "we have a new position");
         this.mMap.addTask(() -> {
@@ -191,6 +193,19 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         });
     }
 
+    public void onNewDrawEvent(DrawResponse response) {
+        this.mMap.addTask(() -> {
+            for (Line l : response.getLines()) {
+                path = new PathLayer(mMap, l.getColor(), (int)l.getThickness());
+                mMap.layers().add(path);
+
+                for (Coordinate c : l.getLine()) {
+                    path.addPoint(new GeoPoint(c.getLat(), c.getLon()));
+                }
+            }
+            mMap.updateMap(true);
+        });
+    }
 
     public void onPause() {
         super.onPause();

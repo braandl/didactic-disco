@@ -1,4 +1,4 @@
-package groovey.didactic.disco.org.didacticdisco.network;
+package groovey.didactic.disco.org.didacticdisco.events;
 
 import android.support.annotation.Nullable;
 
