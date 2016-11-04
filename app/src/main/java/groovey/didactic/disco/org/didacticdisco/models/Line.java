@@ -23,4 +23,28 @@ public class Line {
     public String getNick() {
         return nick;
     }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setNick(String nick) {
+        this.nick = nick;
+    }
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
+
+    public double getThickness() {
+        return thickness;
+    }
+
+    public void setThickness(double thickness) {
+        this.thickness = thickness;
+    }
 }

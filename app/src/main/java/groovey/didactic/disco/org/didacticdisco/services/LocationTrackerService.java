@@ -109,6 +109,7 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public void onLocationChanged(Location location) {
+
         LocationEvent loctionEvent = new LocationEvent(location);
         mRxBus.post(loctionEvent);
 
