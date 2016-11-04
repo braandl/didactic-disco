@@ -211,11 +211,11 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     public void onNewLocation(LocationEvent e) {
         Log.e("TAG", "we have a new position " + e.toString());
-        mMap.setMapPosition(e.getLocation().getLatitude(), e.getLocation().getLongitude(), 1);
         this.mMap.addTask(() -> {
 
             Location t = e.getLocation();
             GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
+            mMap.animator().animateTo(p);
             path.addPoint(p);
             mMap.updateMap(true);
         });
