@@ -91,11 +91,6 @@ public class SignInFragment extends Fragment implements TextView.OnEditorActionL
             username.requestFocus();
         } else {
             session.set(R.string.key_username, username.getText().toString());
-            if (hasLocationPermission()) {
-                getActivity().startService(new Intent(getActivity(), LocationTrackerService.class));
-            } else {
-                getLocationPermissions();
-            }
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_NONE);
             transaction.replace(R.id.content_frame, GameFragment.getInstance());
