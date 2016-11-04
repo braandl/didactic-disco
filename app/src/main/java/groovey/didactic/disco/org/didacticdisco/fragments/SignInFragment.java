@@ -54,9 +54,6 @@ public class SignInFragment extends DialogFragment implements TextView.OnEditorA
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        StrictMode.allowThreadDiskWrites(); //TODO: StrictMode gone after dev!
-        StrictMode.allowThreadDiskReads();
-
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
         ButterKnife.bind(this, view);
         username.setOnEditorActionListener(this);

@@ -53,12 +53,12 @@ import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
 import groovey.didactic.disco.org.didacticdisco.events.NewOnDrawEvent;
-import groovey.didactic.disco.org.didacticdisco.events.OnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.models.Fields;
 import groovey.didactic.disco.org.didacticdisco.models.Line;
 import groovey.didactic.disco.org.didacticdisco.network.Result;
 import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
+
 
 public class GameFragment extends DialogFragment implements ColorPicker.OnColorChangedListener {
 
@@ -170,15 +170,11 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
 
     public void addWidthSlider() {
         SeekBar s = (SeekBar) getActivity().findViewById(R.id.widthSlider);
-        //s.getProgressDrawable().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
-        //s.getThumb().setColorFilter(Color.GREEN, PorterDuff.Mode.SRC_IN);
         s.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 currentlineWidth = Math.max(1, i);
                 restartWithColor(currentLineColor);
-                Log.e("SEEKBAR", "value = " +i);
-
             }
 
             @Override
@@ -211,29 +207,9 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
         mRxBus.register(NewOnDrawEvent.class, this::onNewDrawEvent);
     }
 
-    public void testPathDrawing() {
-        this.mMap.addTask(() -> {
-            for (int i = 0; i < 10000; i++) {
-                GeoPoint p = new GeoPoint(52.5444644 + ((double)i / 10000), 13.3532383 - (double)(i / 10000));
-                lastLocation = p;
-                if (doDraw) {
-                    path.addPoint(p);
-                }
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                mMap.updateMap(true);
-
-            }
-        });
-    }
-
     public void onNewLocation(LocationEvent e) {
         mLoadView.dismiss();
         Location t = e.getLocation();
-        Log.e("TAG", "we have a new position " + e.toString());
         final GeoPoint p = new GeoPoint(t.getLatitude(), t.getLongitude());
         this.mMap.addTask(() -> {
 
@@ -299,14 +275,6 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
         path = new PathLayer(mMap, currentLineColor, 3);
         mMap.layers().add(path);
 
-        /*
-        l = new VectorTileLayer(mMap, new OsmBuildingJsonTileSource());
-        l.setRenderTheme(theme);
-        l.tileRenderer().setOverdrawColor(0);
-        mMap.layers().add(l);
-        mMap.layers().add(new BuildingLayer(mMap, l));
-        */
-
         mPrefs.clear();
 
         //FIXME: Dynamic Start Position
@@ -315,10 +283,6 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
         pos.setByBoundingBox(bBox, Tile.SIZE * 4, Tile.SIZE * 4);
         mRxBus.post(new DrawParameterEvents(bBox, currentLineColor, currentlineWidth));
         mMap.setMapPosition(pos);
-
-
-
-        //testPathDrawing();
     }
 
     private void restartWithColor(int color) {
