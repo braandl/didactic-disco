@@ -199,7 +199,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
                 path = new PathLayer(mMap, l.getColor(), (int)l.getThickness());
                 mMap.layers().add(path);
 
-                for (Coordinate c = l.getLine()) {
+                for (Coordinate c : l.getLine()) {
                     path.addPoint(new GeoPoint(c.getLat(), c.getLon()));
                 }
             }
