@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import groovey.didactic.disco.org.didacticdisco.DiscoApplication;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
+import groovey.didactic.disco.org.didacticdisco.events.NewOnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.events.OnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import retrofit2.Call;
@@ -35,8 +36,8 @@ public class ApiManager {
     // Requests
     ///////////
 
-    public Call<DrawResponse> postLine(LineRequest lineRequest) {
-        Call<DrawResponse> call = mDiscoService.postLine(lineRequest);
+    public Call<Result> postLine(LineRequest lineRequest) {
+        Call<Result> call = mDiscoService.postLine(lineRequest);
         call.enqueue(new DrawingCallback());
         return call;
     }
@@ -45,15 +46,15 @@ public class ApiManager {
     // Callbacks
     ////////////
 
-    public class DrawingCallback extends AbstractRetrofitCallback<DrawResponse> {
+    public class DrawingCallback extends AbstractRetrofitCallback<Result> {
 
         DrawingCallback() {
             super(mRetrofit);
         }
 
         @Override
-        protected void onSuccess(DrawResponse response) {
-            mRxBus.post(new OnDrawEvent(response));
+        protected void onSuccess(Result response) {
+            mRxBus.post(new NewOnDrawEvent(response));
         }
 
         @Override

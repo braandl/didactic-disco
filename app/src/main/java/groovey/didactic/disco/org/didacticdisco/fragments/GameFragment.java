@@ -52,10 +52,12 @@ import groovey.didactic.disco.org.didacticdisco.R;
 import groovey.didactic.disco.org.didacticdisco.data.Session;
 import groovey.didactic.disco.org.didacticdisco.events.DrawParameterEvents;
 import groovey.didactic.disco.org.didacticdisco.events.LocationEvent;
+import groovey.didactic.disco.org.didacticdisco.events.NewOnDrawEvent;
+import groovey.didactic.disco.org.didacticdisco.events.OnDrawEvent;
 import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
+import groovey.didactic.disco.org.didacticdisco.models.Fields;
 import groovey.didactic.disco.org.didacticdisco.models.Line;
-import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
-import groovey.didactic.disco.org.didacticdisco.network.DrawResponse;
+import groovey.didactic.disco.org.didacticdisco.network.Result;
 import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
 public class GameFragment extends DialogFragment implements ColorPicker.OnColorChangedListener {
@@ -206,7 +208,7 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
      */
     public void registerInfoBusses() {
         mRxBus.register(LocationEvent.class, this::onNewLocation);
-        mRxBus.register(DrawResponse.class, this::onNewDrawEvent);
+        mRxBus.register(NewOnDrawEvent.class, this::onNewDrawEvent);
     }
 
     public void testPathDrawing() {
@@ -241,15 +243,18 @@ public class GameFragment extends DialogFragment implements ColorPicker.OnColorC
         mMap.animator().animateTo(p);
     }
 
-    public void onNewDrawEvent(DrawResponse response) {
+    public void onNewDrawEvent(NewOnDrawEvent response) {
+        Result r = response.getResult();
         this.mMap.addTask(() -> {
-            for (Line l : response.getLines()) {
-                path = new PathLayer(mMap, l.getColor(), (int)l.getThickness());
+            for (Line l : r.getResult()) {
+                Fields f = l.getFields();
+                path = new PathLayer(mMap, f.getColor(), (int)f.getThickness());
                 mMap.layers().add(path);
+                GeoPoint g = new GeoPoint(f.getLatstart(), f.getLonstart());
+                GeoPoint g2 = new GeoPoint(f.getLatend(), f.getLonend());
 
-                for (Coordinate c : l.getLine()) {
-                    path.addPoint(new GeoPoint(c.getLat(), c.getLon()));
-                }
+                path.addPoint(g);
+                path.addPoint(g2);
             }
             mMap.updateMap(true);
         });

@@ -9,6 +9,6 @@ import retrofit2.http.POST;
 public interface DiscoService {
 
     @POST("/line")
-    Call<DrawResponse> postLine(@Body LineRequest lineRequest);
+    Call<Result> postLine(@Body LineRequest lineRequest);
 
 }

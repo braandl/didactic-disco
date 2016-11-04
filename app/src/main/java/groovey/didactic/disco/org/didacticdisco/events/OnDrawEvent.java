@@ -1,11 +1,11 @@
 package groovey.didactic.disco.org.didacticdisco.events;
 
 
-import groovey.didactic.disco.org.didacticdisco.network.DrawResponse;
+import groovey.didactic.disco.org.didacticdisco.network.Result;
 
-public class OnDrawEvent extends BaseNetworkEvent<DrawResponse> {
+public class OnDrawEvent extends BaseNetworkEvent<Result> {
 
-    public OnDrawEvent(final DrawResponse response) {
+    public OnDrawEvent(final Result response) {
         super(response);
     }
 
