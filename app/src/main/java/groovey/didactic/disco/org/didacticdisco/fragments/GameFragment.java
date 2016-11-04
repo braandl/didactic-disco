@@ -1,9 +1,15 @@
 package groovey.didactic.disco.org.didacticdisco.fragments;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.support.v4.content.ContextCompat;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -51,8 +57,11 @@ import groovey.didactic.disco.org.didacticdisco.managers.RxBus;
 import groovey.didactic.disco.org.didacticdisco.models.Line;
 import groovey.didactic.disco.org.didacticdisco.network.Coordinate;
 import groovey.didactic.disco.org.didacticdisco.network.DrawResponse;
+import groovey.didactic.disco.org.didacticdisco.services.LocationTrackerService;
 
 public class GameFragment extends Fragment implements ColorPicker.OnColorChangedListener {
+
+    private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
     private Map mMap;
     private MapPreferences mPrefs;
     private MapView mMapView = null;
@@ -73,6 +82,7 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
 
     private int currentLineColor;
     private BoundingBox bBox;
+    private Intent service;
 
     public static GameFragment getInstance() {
         return new GameFragment();
@@ -82,8 +92,6 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
             savedInstanceState)
     {
-        StrictMode.allowThreadDiskWrites(); //TODO: StrictMode gone after dev!
-        StrictMode.allowThreadDiskReads();
         return inflater.inflate(R.layout.gamefragment, container, false);
     }
 
@@ -100,9 +108,24 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
         registerInfoBusses();
         addControls();
 
+        startService();
 
         setupEnvironment();
         currentLineStyle = new LineStyle(10, "", currentLineColor, 10, Paint.Cap.ROUND, true, 0, Color.TRANSPARENT, 0, 2, 0.3f, true, null, false);
+    }
+
+    private void startService() {
+
+        if (hasLocationPermission()) {
+            service = new Intent(getActivity(), LocationTrackerService.class);
+            getActivity().startService(new Intent(getActivity(), LocationTrackerService.class));
+        } else {
+            getLocationPermissions();
+        }
+    }
+
+    public void stopService() {
+        getActivity().stopService(service);
     }
 
     private void addControls() {
@@ -117,7 +140,10 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
             doDraw = s.isChecked();
             lastLocation = null;
             if (doDraw) {
+                startService();
                 restartWithColor(currentLineColor);
+            } else {
+                stopService();
             }
         });
         doDraw = s.isChecked();
@@ -281,4 +307,16 @@ public class GameFragment extends Fragment implements ColorPicker.OnColorChanged
     public void onColorChanged(int color) {
         restartWithColor(color);
     }
+
+    private boolean hasLocationPermission() {
+        return ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void getLocationPermissions() {
+        requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_REQUEST_FINE_LOCATION);
+    }
+
 }
