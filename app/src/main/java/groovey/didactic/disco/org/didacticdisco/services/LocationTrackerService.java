@@ -83,7 +83,6 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Timber.d("service started");
         mGoogleApiClient.connect();
         mRxBus.register(DrawParameterEvents.class, this::onBoundingBox);
         int nId = NotificationUtils.notify(mApplication, NotificationUtils.TRACKING_RUNNING);
@@ -111,17 +110,6 @@ public class LocationTrackerService extends Service implements
                 .build();
     }
 
-    private LocationRequest getLocationRequest() {
-
-
-
-
-        return LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000)
-                .setFastestInterval(500);
-    }
-
     @Override
     public void onProviderEnabled(String provider) {
 
@@ -143,14 +131,9 @@ public class LocationTrackerService extends Service implements
                 location.getLongitude()
         );
 
-        Timber.d("lat=%s, lon=%s",
-                location.getLatitude(),
-                location.getLongitude());
-
         String id = mSession.get(R.string.key_uuid, "");
         String nick = mSession.get(R.string.key_username, "");
 
-        Timber.d("draw = %s, old = %s", drawParamEvent != null, old);
         if (old != null && drawParamEvent != null) {
 
             BoundingBox viewBBox = drawParamEvent.getBoundingBox();
@@ -190,32 +173,32 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public void onLocationStatusChanged(String provider, int status, Bundle extras) {
-        Timber.e("Status changed");
+        Timber.d("Status changed");
     }
 
     @Override
     public void onGnssMeasurementsReceived(GnssMeasurementsEvent event) {
-        Timber.e("onGnssMeasurementsReceived");
+        Timber.d("onGnssMeasurementsReceived");
     }
 
     @Override
     public void onGnssMeasurementsStatusChanged(int status) {
-        Timber.e("onGnssMeasurementsStatusChanged");
+        Timber.d("onGnssMeasurementsStatusChanged");
     }
 
     @Override
     public void onGnssNavigationMessageReceived(GnssNavigationMessage event) {
-        Timber.e("onGnssNavigationMessageReceived");
+        Timber.d("onGnssNavigationMessageReceived");
     }
 
     @Override
     public void onGnssNavigationMessageStatusChanged(int status) {
-        Timber.e("onGnssNavigationMessageStatusChanged");
+        Timber.d("onGnssNavigationMessageStatusChanged");
     }
 
     @Override
     public void onGnssStatusChanged(GnssStatus gnssStatus) {
-        Timber.e("onGnssStatusChanged");
+        Timber.d("onGnssStatusChanged");
     }
 
     @Override
@@ -225,7 +208,7 @@ public class LocationTrackerService extends Service implements
 
     @Override
     public void onNmeaReceived(long l, String s) {
-
+        Timber.d(s);
     }
 
     private void runWithGalileo() {
@@ -235,31 +218,20 @@ public class LocationTrackerService extends Service implements
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Timber.d("Did succeed");
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
     }
 
     @Override
     public void onConnected(Bundle bundle) {
-        Timber.d("connected");
-        //boolean isGranted = checkLocationPermission();
-        //Timber.d("%s", isGranted);
         if (ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Timber.d("Did succeed");
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
-
-        /*LocationServices.FusedLocationApi.requestLocationUpdates(
-                       mGoogleApiClient,
-                          getLocationRequest(),
-                this
-              );*/
     }
 
 
@@ -277,10 +249,4 @@ public class LocationTrackerService extends Service implements
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {}
 
-    /*
-    public boolean checkLocationPermission() {
-        int permissionCheck = ContextCompat.checkSelfPermission(mApplication, Manifest.permission.ACCESS_FINE_LOCATION);
-        return permissionCheck == PackageManager.PERMISSION_GRANTED;
-    }
-    */
 }
